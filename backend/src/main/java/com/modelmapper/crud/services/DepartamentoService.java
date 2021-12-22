@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityNotFoundException;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -23,21 +24,22 @@ public class DepartamentoService {
 
 	@Autowired
 	private DepartamentoRepository repository;
+	@Autowired
+	ModelMapper modelMapper;
 
 	@Transactional
 	public DepartamentoDTO insert(DepartamentoDTO dto) {
-		Departamento entity = new Departamento();
-		copiaDepartamento(entity, dto);
+		Departamento entity = modelMapper.map(dto, Departamento.class);
 		entity = repository.save(entity);
-		return new DepartamentoDTO(entity);
+		return modelMapper.map(entity, DepartamentoDTO.class);
 	}
 
 	@Transactional
 	public DepartamentoDTO update(Long id, DepartamentoDTO dto) {
 		try {
 			Departamento entity = repository.getById(id);
-			copiaDepartamento(entity, dto);
-			return new DepartamentoDTO(entity);
+			 modelMapper.map(dto, Departamento.class);
+			return  modelMapper.map(entity, DepartamentoDTO.class);
 		} catch (EntityNotFoundException e) {
 			throw new ResourceNotFoundException("Departamento não existe: " + id);
 		}
@@ -46,14 +48,14 @@ public class DepartamentoService {
 	@Transactional(readOnly = true)
 	public List<DepartamentoDTO> findAll() {
 		List<Departamento> obj = repository.findAll(Sort.by("nome"));
-		return obj.stream().map(d -> new DepartamentoDTO(d, d.getFuncionario())).collect(Collectors.toList());
+		return obj.stream().map(d -> modelMapper.map(d, DepartamentoDTO.class)).collect(Collectors.toList());
 	}
 
 	@Transactional(readOnly = true)
 	public DepartamentoDTO findById(Long id) {
 		Departamento obj = repository.findById(id)
 				.orElseThrow(() -> new ResourceNotFoundException("Departamento não existe: " + id));
-		return new DepartamentoDTO(obj, obj.getFuncionario());
+		return  modelMapper.map(obj, DepartamentoDTO.class);
 	}
 
 	public void delete(Long id) {
@@ -66,11 +68,5 @@ public class DepartamentoService {
 			throw new DatabaseException("Departamento não existe: " + id);
 
 		}
-	}
-
-	private void copiaDepartamento(Departamento entity, DepartamentoDTO dto) {
-		entity.setNome(dto.getNome());
-		entity = repository.save(entity);
-
 	}
 }

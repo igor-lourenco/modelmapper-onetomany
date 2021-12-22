@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityNotFoundException;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -28,31 +29,35 @@ public class FuncionarioService {
 	private FuncionarioRepository repository;
 	@Autowired
 	private DepartamentoRepository departamentoRepository;
-	
+	@Autowired
+	ModelMapper modelMapper;
+
 	@Transactional
 	public FuncionarioDTO insert(FuncionarioDTO dto) {
-		Funcionario entity = new Funcionario();
+		Funcionario entity = modelMapper.map(dto, Funcionario.class);
 		copiaEntidade(entity, dto);
-		return new FuncionarioDTO(entity);
+		return modelMapper.map(entity, FuncionarioDTO.class);
 	}
 
 	@Transactional
 	public FuncionarioDTO update(Long id, FuncionarioDTO dto) {
-			Funcionario entity = repository.getById(id);
-			copiaEntidade(entity, dto);
-			return new FuncionarioDTO(entity);
+		Funcionario entity = repository.getById(id);
+		 modelMapper.map(dto, entity);
+		copiaEntidade(entity, dto);
+		return  modelMapper.map(entity, FuncionarioDTO.class);
 	}
 
 	@Transactional(readOnly = true)
 	public List<FuncionarioDTO> findAll() {
 		List<Funcionario> obj = repository.findAll(Sort.by("nome"));
-		return obj.stream().map(FuncionarioDTO::new).collect(Collectors.toList());
+		return obj.stream().map(f ->  modelMapper.map(f, FuncionarioDTO.class)).collect(Collectors.toList());
 	}
 
 	@Transactional(readOnly = true)
 	public FuncionarioDTO findById(Long id) {
-		Funcionario obj = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Funcionario não existe: " + id));
-		return new FuncionarioDTO(obj);
+		Funcionario obj = repository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Funcionario não existe: " + id));
+		 return modelMapper.map(obj, FuncionarioDTO.class);
 	}
 
 	public void delete(Long id) {
@@ -65,18 +70,17 @@ public class FuncionarioService {
 			throw new DatabaseException("Funcionario não existe: " + id);
 		}
 	}
-	
+
 	private void copiaEntidade(Funcionario entity, FuncionarioDTO dto) {
 		try {
-		entity.setNome(dto.getNome());
-		Departamento departamento = departamentoRepository.getById(dto.getDepartamento());
-		departamento.getFuncionario().add(entity);
-		departamentoRepository.save(departamento);
-		entity.setDepartamento(departamento);
-		entity = repository.save(entity);
-		}catch(InvalidDataAccessApiUsageException e) {
-			throw new  ResourceNotFoundException("Funcionário não pode ser inserido ser Departamento!");
-		}catch (EntityNotFoundException e) {
+			Departamento departamento = departamentoRepository.getById(dto.getDepartamento());
+			departamento.getFuncionario().add(entity);
+			departamentoRepository.save(departamento);
+			entity.setDepartamento(departamento);
+			entity = repository.save(entity);
+		} catch (InvalidDataAccessApiUsageException e) {
+			throw new ResourceNotFoundException("Funcionário não pode ser inserido ser Departamento!");
+		} catch (EntityNotFoundException e) {
 			throw new ResourceNotFoundException("Departamento não existe: " + dto.getDepartamento());
 		}
 	}
