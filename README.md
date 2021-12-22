@@ -1,7 +1,7 @@
-# Mapeamento onetoone com ModelMapper
+# Mapeamento OneToMany com ModelMapper
 
 
-CRUD com mapeamento one to one usando os frameworks Spring e ModelMapper
+CRUD com mapeamento one to many usando os frameworks Spring e ModelMapper com java
 
 ## Modelo conceitual
 ![Modelo Conceitual](https://github.com/igor-lourenco/modelmapper-onetomany/blob/main/images/UML.png)
