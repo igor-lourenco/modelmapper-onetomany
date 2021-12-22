@@ -18,8 +18,11 @@ public class FuncionarioDTO  implements Serializable {
 	
 	private Long id;
 	private String nome;
+	private Long departamento;
+	
 	public FuncionarioDTO(Funcionario obj) {
-		this.id = obj.getId();
-		this.nome = obj.getNome();
+		id = obj.getId();
+		nome = obj.getNome();
+		departamento = obj.getDepartamento().getId();
 	}
 }

@@ -8,12 +8,15 @@ import javax.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.modelmapper.crud.dto.FuncionarioDTO;
+import com.modelmapper.crud.entities.Departamento;
 import com.modelmapper.crud.entities.Funcionario;
+import com.modelmapper.crud.repositories.DepartamentoRepository;
 import com.modelmapper.crud.repositories.FuncionarioRepository;
 import com.modelmapper.crud.services.exceptions.DatabaseException;
 import com.modelmapper.crud.services.exceptions.ResourceNotFoundException;
@@ -23,25 +26,21 @@ public class FuncionarioService {
 
 	@Autowired
 	private FuncionarioRepository repository;
+	@Autowired
+	private DepartamentoRepository departamentoRepository;
 	
 	@Transactional
 	public FuncionarioDTO insert(FuncionarioDTO dto) {
 		Funcionario entity = new Funcionario();
-		entity.setNome(dto.getNome());
-		entity = repository.save(entity);
+		copiaEntidade(entity, dto);
 		return new FuncionarioDTO(entity);
 	}
 
 	@Transactional
 	public FuncionarioDTO update(Long id, FuncionarioDTO dto) {
-		try {
 			Funcionario entity = repository.getById(id);
-			entity.setNome(dto.getNome());
-			entity = repository.save(entity);
+			copiaEntidade(entity, dto);
 			return new FuncionarioDTO(entity);
-		} catch (EntityNotFoundException e) {
-			throw new ResourceNotFoundException("Funcionario não existe: " + id);
-		}
 	}
 
 	@Transactional(readOnly = true)
@@ -64,6 +63,21 @@ public class FuncionarioService {
 
 		} catch (DataIntegrityViolationException e) {
 			throw new DatabaseException("Funcionario não existe: " + id);
+		}
+	}
+	
+	private void copiaEntidade(Funcionario entity, FuncionarioDTO dto) {
+		try {
+		entity.setNome(dto.getNome());
+		Departamento departamento = departamentoRepository.getById(dto.getDepartamento());
+		departamento.getFuncionario().add(entity);
+		departamentoRepository.save(departamento);
+		entity.setDepartamento(departamento);
+		entity = repository.save(entity);
+		}catch(InvalidDataAccessApiUsageException e) {
+			throw new  ResourceNotFoundException("Funcionário não pode ser inserido ser Departamento!");
+		}catch (EntityNotFoundException e) {
+			throw new ResourceNotFoundException("Departamento não existe: " + dto.getDepartamento());
 		}
 	}
 }

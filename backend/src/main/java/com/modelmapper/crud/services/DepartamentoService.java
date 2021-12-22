@@ -23,11 +23,11 @@ public class DepartamentoService {
 
 	@Autowired
 	private DepartamentoRepository repository;
-	
+
 	@Transactional
 	public DepartamentoDTO insert(DepartamentoDTO dto) {
 		Departamento entity = new Departamento();
-		entity.setNome(dto.getNome());
+		copiaDepartamento(entity, dto);
 		entity = repository.save(entity);
 		return new DepartamentoDTO(entity);
 	}
@@ -36,8 +36,7 @@ public class DepartamentoService {
 	public DepartamentoDTO update(Long id, DepartamentoDTO dto) {
 		try {
 			Departamento entity = repository.getById(id);
-			entity.setNome(dto.getNome());
-			entity = repository.save(entity);
+			copiaDepartamento(entity, dto);
 			return new DepartamentoDTO(entity);
 		} catch (EntityNotFoundException e) {
 			throw new ResourceNotFoundException("Departamento não existe: " + id);
@@ -47,13 +46,14 @@ public class DepartamentoService {
 	@Transactional(readOnly = true)
 	public List<DepartamentoDTO> findAll() {
 		List<Departamento> obj = repository.findAll(Sort.by("nome"));
-		return obj.stream().map(DepartamentoDTO::new).collect(Collectors.toList());
+		return obj.stream().map(d -> new DepartamentoDTO(d, d.getFuncionario())).collect(Collectors.toList());
 	}
 
 	@Transactional(readOnly = true)
 	public DepartamentoDTO findById(Long id) {
-		Departamento obj = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Departamento não existe: " + id));
-		return new DepartamentoDTO(obj);
+		Departamento obj = repository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Departamento não existe: " + id));
+		return new DepartamentoDTO(obj, obj.getFuncionario());
 	}
 
 	public void delete(Long id) {
@@ -66,5 +66,11 @@ public class DepartamentoService {
 			throw new DatabaseException("Departamento não existe: " + id);
 
 		}
+	}
+
+	private void copiaDepartamento(Departamento entity, DepartamentoDTO dto) {
+		entity.setNome(dto.getNome());
+		entity = repository.save(entity);
+
 	}
 }
