@@ -16,7 +16,6 @@ public class DepartamentoController implements GenericController<Departamento, D
 	@Autowired
 	private DepartamentoService service;
 	
-
 	@Override
 	public GenericService<Departamento, DepartamentoDTO, Long> service() {
 		return service;

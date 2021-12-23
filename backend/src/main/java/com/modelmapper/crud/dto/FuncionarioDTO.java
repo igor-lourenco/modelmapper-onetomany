@@ -25,4 +25,9 @@ public class FuncionarioDTO  implements Serializable {
 		nome = obj.getNome();
 		departamento = obj.getDepartamento().getId();
 	}
+	
+	@Override // pra mapear o id na API quando usar PUT
+	public String toString() {
+		return id.toString();
+	}
 }

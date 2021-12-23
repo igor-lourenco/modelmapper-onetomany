@@ -17,7 +17,6 @@ import com.modelmapper.crud.util.ConverterEntity;
 
 public interface GenericController<T extends ConverterEntity<DTO>, DTO, ID> {
 	
-	
 	GenericService<T, DTO, ID> service();
 	
 	@PutMapping(value = "/{id}")
@@ -51,5 +50,4 @@ public interface GenericController<T extends ConverterEntity<DTO>, DTO, ID> {
 		service().delete(id);
 		return ResponseEntity.noContent().build();
 	}
-
 }
