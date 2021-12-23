@@ -10,6 +10,9 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
+import com.modelmapper.crud.dto.DepartamentoDTO;
+import com.modelmapper.crud.util.ConverterEntity;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,7 +21,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "tb_departamento")
-public class Departamento implements Serializable {
+public class Departamento implements ConverterEntity<DepartamentoDTO>, Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	@Id
@@ -28,4 +31,9 @@ public class Departamento implements Serializable {
 	
 	@OneToMany(mappedBy = "departamento")
 	private List<Funcionario> funcionario = new ArrayList<>();
+
+	@Override
+	public DepartamentoDTO converterEntity() {
+		return new DepartamentoDTO(this, funcionario);
+	}
 }
