@@ -26,17 +26,19 @@ public interface GenericController<T extends ConverterEntity<DTO>, DTO, ID> {
 		return ResponseEntity.ok(obj);
 	}
 
-	@PostMapping
-	default ResponseEntity<DTO> insert(@RequestBody DTO dto){
-		var obj = service().insert(dto);
-		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").
-				buildAndExpand(obj).toUri();
-		return ResponseEntity.created(uri).body(obj);
-	}
+	
 	@GetMapping(value = "/{id}")
 	default ResponseEntity<DTO> findById(@PathVariable ID id){
 		var obj = service().findById(id);
 		return ResponseEntity.ok(obj);
+	}
+	
+	@PostMapping
+	default ResponseEntity<DTO> insert(@RequestBody DTO dto){
+		var obj = service().insert(dto);
+		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").
+				buildAndExpand(obj.toString()).toUri();
+		return ResponseEntity.created(uri).body(obj);
 	}
 
 	@GetMapping

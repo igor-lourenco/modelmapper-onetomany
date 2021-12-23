@@ -32,4 +32,10 @@ public class DepartamentoDTO implements Serializable {
 		this(obj);
 		funcionario.forEach(f -> this.funcionario.add(new FuncionarioDTO(f)));
 	}
+	
+	
+	@Override // pra mapear o id na API quando usar PUT
+	public String toString() {
+		return id.toString();
+	}
 }
