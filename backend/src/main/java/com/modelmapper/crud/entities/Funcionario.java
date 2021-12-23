@@ -9,6 +9,9 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import com.modelmapper.crud.dto.FuncionarioDTO;
+import com.modelmapper.crud.util.ConverterEntity;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,7 +20,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity(name = "tb_funcionario")
-public class Funcionario implements Serializable {
+public class Funcionario implements ConverterEntity<FuncionarioDTO>, Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	@Id
@@ -28,4 +31,9 @@ public class Funcionario implements Serializable {
 	@ManyToOne
 	@JoinColumn(name = "departamento_id")
 	private Departamento departamento;
+
+	@Override
+	public FuncionarioDTO converterEntity() {
+		return new FuncionarioDTO(this);
+	}
 }

@@ -7,24 +7,22 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.modelmapper.crud.services.exceptions.DatabaseException;
 import com.modelmapper.crud.services.exceptions.ResourceNotFoundException;
 import com.modelmapper.crud.util.ConverterEntity;
 
-@Service
-public interface GenericService <T extends ConverterEntity<DTO>, DTO, ID > {
-	
+public interface GenericService<T extends ConverterEntity<DTO>, DTO, ID> {
+
 	JpaRepository<T, ID> repository();
-	
+
 	@Transactional
 	DTO insert(DTO dto);
 
 	@Transactional
 	DTO update(ID id, DTO dto);
-	
+
 	@Transactional(readOnly = true)
 	default List<DTO> findAll() {
 		List<T> obj = repository().findAll(Sort.by("nome"));
@@ -33,9 +31,8 @@ public interface GenericService <T extends ConverterEntity<DTO>, DTO, ID > {
 
 	@Transactional(readOnly = true)
 	default DTO findById(ID id) {
-		T obj = repository().findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("id não existe: " + id));
-		 return obj.converterEntity();
+		T obj = repository().findById(id).orElseThrow(() -> new ResourceNotFoundException("id não existe: " + id));
+		return obj.converterEntity();
 	}
 
 	default void delete(ID id) {
@@ -43,10 +40,8 @@ public interface GenericService <T extends ConverterEntity<DTO>, DTO, ID > {
 			repository().deleteById(id);
 		} catch (EmptyResultDataAccessException e) {
 			throw new ResourceNotFoundException("id não existe: " + id);
-
 		} catch (DataIntegrityViolationException e) {
 			throw new DatabaseException("Exceção no banco");
 		}
 	}
-
 }
